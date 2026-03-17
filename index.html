@@ -1,0 +1,556 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lessie Bea Daily Top 3</title>
+<style>
+body{font-family:Arial,sans-serif;background:#fff0f5;padding:20px;color:#333}
+h1,h2,h3{color:#c71585}
+.card{background:#fff;border:1px solid #f3c1d9;border-radius:12px;padding:16px;margin-bottom:20px}
+.topbar{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+input,button,select,textarea{padding:8px;border-radius:8px;border:1px solid #ccc;font-size:14px;font-family:Arial,sans-serif}
+button{background:#ffb6c1;font-weight:bold;cursor:pointer;border:none}
+button:hover{opacity:.9}
+.checks{display:flex;gap:12px;margin-top:12px;flex-wrap:wrap}
+.checkbox{background:#fff;border:1px solid #f3c1d9;padding:8px 12px;border-radius:10px}
+.form-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px;margin-top:12px}
+.full{grid-column:1/-1}
+table{width:100%;border-collapse:collapse;background:#fff}
+th,td{border:1px solid #ddd;padding:8px;text-align:center;vertical-align:middle}
+th{background:#ffb6c1}
+.status{width:38px;height:38px;border-radius:10px;border:none;font-size:22px;cursor:pointer;background:#eee}
+.done{background:#d8f5d0;color:#0b7a22}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px}
+.stat{background:#fff;border:1px solid #f3c1d9;border-radius:12px;padding:12px;text-align:center}
+.big{font-size:28px;font-weight:bold}
+.calendar{display:grid;grid-template-columns:repeat(7,1fr);gap:6px}
+.calhead{background:#ffb6c1;padding:8px;text-align:center;font-weight:bold;border-radius:8px}
+.day{background:#fff;border:1px solid #ddd;border-radius:10px;min-height:170px;padding:6px;font-size:12px;cursor:pointer}
+.day:hover{background:#fff7fb}
+.empty{background:#f9f9f9;cursor:default}
+.today{outline:2px solid #c71585}
+.badge{display:block;margin:2px 0;padding:2px 4px;border-radius:6px;word-break:break-word}
+.ok{background:#d8f5d0}
+.no{background:#f8d7da}
+.modal{position:fixed;inset:0;background:rgba(0,0,0,.5);display:none;align-items:center;justify-content:center;padding:10px}
+.modalbox{background:#fff;padding:20px;border-radius:16px;width:95%;max-width:700px;max-height:90vh;overflow:auto}
+.small{font-size:12px;color:#666}
+.left{text-align:left;min-width:160px}
+textarea{width:100%;min-height:70px;resize:vertical}
+input[type="text"],input[type="time"],input[type="date"]{width:100%;box-sizing:border-box}
+.nowrap{white-space:nowrap}
+</style>
+</head>
+<body>
+
+<h1>💜 Lessie Bea Daily Top 3</h1>
+
+<div class="card">
+  <div class="topbar">
+    <input type="date" id="dateInput">
+    <button onclick="checkin()">Check-In</button>
+  </div>
+
+  <div class="checks">
+    <label class="checkbox"><input type="checkbox" id="workoutInput"> Workout</label>
+    <label class="checkbox"><input type="checkbox" id="wholesaleInput"> Wholesale</label>
+    <label class="checkbox"><input type="checkbox" id="goalInput"> Life Goal</label>
+  </div>
+
+  <div class="form-grid">
+    <div>
+      <div class="small">Workout Type</div>
+      <input type="text" id="workoutTypeInput" placeholder="Walking, weights, treadmill">
+    </div>
+    <div>
+      <div class="small">Workout Start</div>
+      <input type="time" id="workoutStartInput">
+    </div>
+    <div>
+      <div class="small">Workout Stop</div>
+      <input type="time" id="workoutStopInput">
+    </div>
+    <div>
+      <div class="small">Goal Name I'm Working On</div>
+      <input type="text" id="goalNameInput" placeholder="GED, Teeth, Bookkeeping, Home">
+    </div>
+    <div class="full">
+      <div class="small">What I Worked On in Real Estate</div>
+      <textarea id="realEstateWorkInput" placeholder="Called 20 leads, follow-ups, comped property, texted sellers..."></textarea>
+    </div>
+  </div>
+</div>
+
+<div class="card">
+  <h2>Dashboard</h2>
+  <div class="stats">
+    <div class="stat">
+      <h3>🔥 Streak</h3>
+      <div id="streak" class="big">0 days</div>
+    </div>
+
+    <div class="stat">
+      <h3>🏆 Weekly Grade</h3>
+      <div id="grade" class="big">F</div>
+      <div class="small" style="margin-top:8px">
+        A = 19-21 ⭐ Excellent<br>
+        B = 17-18 👍 Good<br>
+        C = 14-16 🙂 Average<br>
+        D = 10-13 ⚠ Needs Work<br>
+        F = 0-9 ❌ Failing
+      </div>
+    </div>
+
+    <div class="stat">
+      <h3>Score</h3>
+      <div id="score" class="big">0 / 21</div>
+    </div>
+  </div>
+</div>
+
+<div class="card" style="overflow:auto">
+  <table id="tbl">
+    <thead>
+      <tr>
+        <th>Date</th>
+        <th>Workout</th>
+        <th>Wholesale</th>
+        <th>Goal</th>
+        <th>Workout Type</th>
+        <th>Start</th>
+        <th>Stop</th>
+        <th>Goal Name</th>
+        <th>Real Estate Work</th>
+        <th>Delete</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+</div>
+
+<div class="card">
+  <h2>Calendar</h2>
+  <div class="topbar" style="margin-bottom:10px">
+    <button onclick="changeMonth(-1)">Prev</button>
+    <h3 id="monthTitle" style="margin:0"></h3>
+    <button onclick="changeMonth(1)">Next</button>
+  </div>
+  <div class="calendar" id="heads"></div>
+  <div class="calendar" id="grid"></div>
+</div>
+
+<div class="modal" id="modal">
+  <div class="modalbox">
+    <h3 id="modalDate"></h3>
+
+    <div class="checks">
+      <label class="checkbox"><input type="checkbox" id="modalWorkout"> Workout</label>
+      <label class="checkbox"><input type="checkbox" id="modalWholesale"> Wholesale</label>
+      <label class="checkbox"><input type="checkbox" id="modalGoal"> Goal</label>
+    </div>
+
+    <div class="form-grid">
+      <div>
+        <div class="small">Workout Type</div>
+        <input type="text" id="modalWorkoutType" placeholder="Walking, weights, treadmill">
+      </div>
+      <div>
+        <div class="small">Workout Start</div>
+        <input type="time" id="modalWorkoutStart">
+      </div>
+      <div>
+        <div class="small">Workout Stop</div>
+        <input type="time" id="modalWorkoutStop">
+      </div>
+      <div>
+        <div class="small">Goal Name I'm Working On</div>
+        <input type="text" id="modalGoalName" placeholder="GED, Teeth, Bookkeeping, Home">
+      </div>
+      <div class="full">
+        <div class="small">What I Worked On in Real Estate</div>
+        <textarea id="modalRealEstateWork" placeholder="Called 20 leads, follow-ups, comped property, texted sellers..."></textarea>
+      </div>
+    </div>
+
+    <br>
+    <button onclick="saveModal()">Save</button>
+    <button onclick="deleteModal()">Delete</button>
+    <button onclick="closeModal()">Cancel</button>
+  </div>
+</div>
+
+<script>
+const STORAGE_KEY = "lb_top3_data_v3";
+
+const dateInput = document.getElementById("dateInput");
+const workoutInput = document.getElementById("workoutInput");
+const wholesaleInput = document.getElementById("wholesaleInput");
+const goalInput = document.getElementById("goalInput");
+const workoutTypeInput = document.getElementById("workoutTypeInput");
+const workoutStartInput = document.getElementById("workoutStartInput");
+const workoutStopInput = document.getElementById("workoutStopInput");
+const goalNameInput = document.getElementById("goalNameInput");
+const realEstateWorkInput = document.getElementById("realEstateWorkInput");
+
+const tblBody = document.querySelector("#tbl tbody");
+const streakEl = document.getElementById("streak");
+const gradeEl = document.getElementById("grade");
+const scoreEl = document.getElementById("score");
+
+const headsEl = document.getElementById("heads");
+const gridEl = document.getElementById("grid");
+const monthTitleEl = document.getElementById("monthTitle");
+
+const modalEl = document.getElementById("modal");
+const modalDateEl = document.getElementById("modalDate");
+const modalWorkoutEl = document.getElementById("modalWorkout");
+const modalWholesaleEl = document.getElementById("modalWholesale");
+const modalGoalEl = document.getElementById("modalGoal");
+const modalWorkoutTypeEl = document.getElementById("modalWorkoutType");
+const modalWorkoutStartEl = document.getElementById("modalWorkoutStart");
+const modalWorkoutStopEl = document.getElementById("modalWorkoutStop");
+const modalGoalNameEl = document.getElementById("modalGoalName");
+const modalRealEstateWorkEl = document.getElementById("modalRealEstateWork");
+
+let currentMonth = new Date();
+let selectedDate = null;
+
+function escapeHtml(text){
+  const div = document.createElement("div");
+  div.textContent = text || "";
+  return div.innerHTML;
+}
+
+function getData(){
+  const raw = localStorage.getItem(STORAGE_KEY);
+  const arr = raw ? JSON.parse(raw) : [];
+  return arr.sort((a,b)=>a.date.localeCompare(b.date));
+}
+
+function setData(arr){
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(arr));
+  renderAll();
+}
+
+function cleanEntry(entry){
+  return {
+    date: entry.date || "",
+    workout: !!entry.workout,
+    wholesale: !!entry.wholesale,
+    goal: !!entry.goal,
+    workoutType: entry.workoutType || "",
+    workoutStart: entry.workoutStart || "",
+    workoutStop: entry.workoutStop || "",
+    goalName: entry.goalName || "",
+    realEstateWork: entry.realEstateWork || ""
+  };
+}
+
+function checkin(){
+  const date = dateInput.value;
+  if(!date){
+    alert("Pick a date");
+    return;
+  }
+
+  const entry = cleanEntry({
+    date,
+    workout: workoutInput.checked,
+    wholesale: wholesaleInput.checked,
+    goal: goalInput.checked,
+    workoutType: workoutTypeInput.value.trim(),
+    workoutStart: workoutStartInput.value,
+    workoutStop: workoutStopInput.value,
+    goalName: goalNameInput.value.trim(),
+    realEstateWork: realEstateWorkInput.value.trim()
+  });
+
+  let arr = getData();
+  const index = arr.findIndex(x => x.date === date);
+
+  if(index > -1){
+    arr[index] = entry;
+  } else {
+    arr.push(entry);
+  }
+
+  setData(arr);
+
+  dateInput.value = "";
+  workoutInput.checked = false;
+  wholesaleInput.checked = false;
+  goalInput.checked = false;
+  workoutTypeInput.value = "";
+  workoutStartInput.value = "";
+  workoutStopInput.value = "";
+  goalNameInput.value = "";
+  realEstateWorkInput.value = "";
+}
+
+function toggleStatus(date, field){
+  const arr = getData();
+  const item = arr.find(x => x.date === date);
+  if(!item) return;
+  item[field] = !item[field];
+  setData(arr);
+}
+
+function deleteRow(date){
+  const arr = getData().filter(x => x.date !== date);
+  setData(arr);
+}
+
+function renderTable(){
+  const arr = getData();
+  tblBody.innerHTML = "";
+
+  arr.forEach(item => {
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
+      <td class="nowrap">${escapeHtml(item.date)}</td>
+      <td><button class="status ${item.workout ? "done" : ""}" onclick="toggleStatus('${item.date}','workout')">${item.workout ? "✔" : ""}</button></td>
+      <td><button class="status ${item.wholesale ? "done" : ""}" onclick="toggleStatus('${item.date}','wholesale')">${item.wholesale ? "✔" : ""}</button></td>
+      <td><button class="status ${item.goal ? "done" : ""}" onclick="toggleStatus('${item.date}','goal')">${item.goal ? "✔" : ""}</button></td>
+      <td class="left">${escapeHtml(item.workoutType)}</td>
+      <td class="nowrap">${escapeHtml(item.workoutStart)}</td>
+      <td class="nowrap">${escapeHtml(item.workoutStop)}</td>
+      <td class="left">${escapeHtml(item.goalName)}</td>
+      <td class="left">${escapeHtml(item.realEstateWork)}</td>
+      <td><button onclick="deleteRow('${item.date}')">X</button></td>
+    `;
+    tblBody.appendChild(tr);
+  });
+}
+
+function getStartOfWeek(date){
+  const d = new Date(date);
+  d.setHours(0,0,0,0);
+  const day = d.getDay();
+  const diff = day === 0 ? -6 : 1 - day;
+  d.setDate(d.getDate() + diff);
+  return d;
+}
+
+function renderDashboard(){
+  const arr = getData();
+
+  const today = new Date();
+  const weekStart = getStartOfWeek(today);
+  const weekEnd = new Date(weekStart);
+  weekEnd.setDate(weekEnd.getDate() + 6);
+
+  let weeklyScore = 0;
+
+  arr.forEach(item => {
+    const d = new Date(item.date + "T00:00:00");
+    if(d >= weekStart && d <= weekEnd){
+      if(item.workout) weeklyScore++;
+      if(item.wholesale) weeklyScore++;
+      if(item.goal) weeklyScore++;
+    }
+  });
+
+  scoreEl.textContent = weeklyScore + " / 21";
+
+  let grade = "F";
+  if(weeklyScore >= 19) grade = "A";
+  else if(weeklyScore >= 17) grade = "B";
+  else if(weeklyScore >= 14) grade = "C";
+  else if(weeklyScore >= 10) grade = "D";
+  gradeEl.textContent = grade;
+
+  const activeDates = arr
+    .filter(x => x.workout || x.wholesale || x.goal)
+    .map(x => x.date)
+    .sort();
+
+  if(activeDates.length === 0){
+    streakEl.textContent = "0 days";
+    return;
+  }
+
+  const latest = new Date(activeDates[activeDates.length - 1] + "T00:00:00");
+  const todayOnly = new Date();
+  todayOnly.setHours(0,0,0,0);
+
+  const gap = Math.round((todayOnly - latest) / (1000 * 60 * 60 * 24));
+  if(gap > 1){
+    streakEl.textContent = "0 days";
+    return;
+  }
+
+  let streak = 1;
+  for(let i = activeDates.length - 1; i > 0; i--){
+    const curr = new Date(activeDates[i] + "T00:00:00");
+    const prev = new Date(activeDates[i - 1] + "T00:00:00");
+    const diff = Math.round((curr - prev) / (1000 * 60 * 60 * 24));
+    if(diff === 1){
+      streak++;
+    } else {
+      break;
+    }
+  }
+
+  streakEl.textContent = streak + " day" + (streak === 1 ? "" : "s");
+}
+
+function changeMonth(offset){
+  currentMonth.setMonth(currentMonth.getMonth() + offset);
+  renderCalendar();
+}
+
+function renderCalendar(){
+  headsEl.innerHTML = "";
+  gridEl.innerHTML = "";
+
+  ["Mon","Tue","Wed","Thu","Fri","Sat","Sun"].forEach(day => {
+    const div = document.createElement("div");
+    div.className = "calhead";
+    div.textContent = day;
+    headsEl.appendChild(div);
+  });
+
+  const year = currentMonth.getFullYear();
+  const month = currentMonth.getMonth();
+
+  monthTitleEl.textContent = currentMonth.toLocaleString("default", {
+    month: "long",
+    year: "numeric"
+  });
+
+  const firstDay = new Date(year, month, 1);
+  const lastDay = new Date(year, month + 1, 0);
+
+  let startDay = firstDay.getDay();
+  startDay = startDay === 0 ? 6 : startDay - 1;
+
+  for(let i = 0; i < startDay; i++){
+    const empty = document.createElement("div");
+    empty.className = "day empty";
+    gridEl.appendChild(empty);
+  }
+
+  const arr = getData();
+  const totalDays = lastDay.getDate();
+
+  for(let day = 1; day <= totalDays; day++){
+    const dateStr = `${year}-${String(month + 1).padStart(2,"0")}-${String(day).padStart(2,"0")}`;
+    const entry = arr.find(x => x.date === dateStr);
+
+    const cell = document.createElement("div");
+    cell.className = "day";
+
+    const today = new Date();
+    const todayStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2,"0")}-${String(today.getDate()).padStart(2,"0")}`;
+    if(dateStr === todayStr){
+      cell.classList.add("today");
+    }
+
+    let html = `<b>${day}</b>`;
+
+    if(entry){
+      html += `<span class="badge ${entry.workout ? "ok" : "no"}">Workout ${entry.workout ? "✔" : "✘"}</span>`;
+      if(entry.workoutType){
+        html += `<span class="badge ok">${escapeHtml(entry.workoutType)}</span>`;
+      }
+      if(entry.workoutStart || entry.workoutStop){
+        html += `<span class="badge ok">${escapeHtml(entry.workoutStart || "--")} - ${escapeHtml(entry.workoutStop || "--")}</span>`;
+      }
+      html += `<span class="badge ${entry.wholesale ? "ok" : "no"}">Wholesale ${entry.wholesale ? "✔" : "✘"}</span>`;
+      if(entry.realEstateWork){
+        html += `<span class="badge ok">${escapeHtml(entry.realEstateWork)}</span>`;
+      }
+      html += `<span class="badge ${entry.goal ? "ok" : "no"}">Goal ${entry.goal ? "✔" : "✘"}</span>`;
+      if(entry.goalName){
+        html += `<span class="badge ok">${escapeHtml(entry.goalName)}</span>`;
+      }
+    } else {
+      html += `<span class="badge no">No check-in</span>`;
+    }
+
+    cell.innerHTML = html;
+    cell.addEventListener("click", () => openModal(dateStr));
+    gridEl.appendChild(cell);
+  }
+}
+
+function openModal(date){
+  selectedDate = date;
+  modalDateEl.textContent = date;
+
+  const entry = getData().find(x => x.date === date) || cleanEntry({
+    date,
+    workout:false,
+    wholesale:false,
+    goal:false
+  });
+
+  modalWorkoutEl.checked = entry.workout;
+  modalWholesaleEl.checked = entry.wholesale;
+  modalGoalEl.checked = entry.goal;
+  modalWorkoutTypeEl.value = entry.workoutType || "";
+  modalWorkoutStartEl.value = entry.workoutStart || "";
+  modalWorkoutStopEl.value = entry.workoutStop || "";
+  modalGoalNameEl.value = entry.goalName || "";
+  modalRealEstateWorkEl.value = entry.realEstateWork || "";
+
+  modalEl.style.display = "flex";
+}
+
+function closeModal(){
+  modalEl.style.display = "none";
+  selectedDate = null;
+}
+
+function saveModal(){
+  if(!selectedDate) return;
+
+  let arr = getData();
+  const entry = cleanEntry({
+    date: selectedDate,
+    workout: modalWorkoutEl.checked,
+    wholesale: modalWholesaleEl.checked,
+    goal: modalGoalEl.checked,
+    workoutType: modalWorkoutTypeEl.value.trim(),
+    workoutStart: modalWorkoutStartEl.value,
+    workoutStop: modalWorkoutStopEl.value,
+    goalName: modalGoalNameEl.value.trim(),
+    realEstateWork: modalRealEstateWorkEl.value.trim()
+  });
+
+  const index = arr.findIndex(x => x.date === selectedDate);
+  if(index > -1){
+    arr[index] = entry;
+  } else {
+    arr.push(entry);
+  }
+
+  setData(arr);
+  closeModal();
+}
+
+function deleteModal(){
+  if(!selectedDate) return;
+  const arr = getData().filter(x => x.date !== selectedDate);
+  setData(arr);
+  closeModal();
+}
+
+window.addEventListener("click", function(e){
+  if(e.target === modalEl){
+    closeModal();
+  }
+});
+
+function renderAll(){
+  renderTable();
+  renderDashboard();
+  renderCalendar();
+}
+
+renderAll();
+</script>
+
+</body>
+</html>
