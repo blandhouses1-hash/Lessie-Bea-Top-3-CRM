@@ -38,8 +38,11 @@ th{background:#ffb6c1}
 .small{font-size:12px;color:#666}
 .left{text-align:left;min-width:160px}
 textarea{width:100%;min-height:70px;resize:vertical}
-input[type="text"],input[type="time"],input[type="date"]{width:100%;box-sizing:border-box}
+input[type="text"],input[type="time"],input[type="date"],input[type="number"],input[type="month"]{width:100%;box-sizing:border-box}
 .nowrap{white-space:nowrap}
+.quiz-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px;margin-top:12px}
+.quiz-item{background:#fff;border:1px solid #f3c1d9;padding:10px;border-radius:10px}
+.report-result{margin-top:12px;padding:12px;border-radius:10px;background:#fff7fb;border:1px solid #f3c1d9}
 </style>
 </head>
 <body>
@@ -106,6 +109,98 @@ input[type="text"],input[type="time"],input[type="date"]{width:100%;box-sizing:b
       <h3>Score</h3>
       <div id="score" class="big">0 / 21</div>
     </div>
+  </div>
+</div>
+
+<div class="card">
+  <h2>⭐ Weekly Top-3 Progress Quiz</h2>
+  <div class="small">Take this at the end of each week like a real report from your teacher.</div>
+
+  <div class="form-grid">
+    <div>
+      <div class="small">Week Of</div>
+      <input type="date" id="quizWeekOf">
+    </div>
+    <div>
+      <div class="small">Teacher Comment</div>
+      <input type="text" id="quizComment" placeholder="What did I do well or need to improve?">
+    </div>
+    <div>
+      <div class="small">My Reward If I Get An A</div>
+      <input type="text" id="quizReward" placeholder="Dinner, self-care, save for shop...">
+    </div>
+  </div>
+
+  <div class="quiz-grid">
+    <label class="quiz-item"><input type="checkbox" id="q1"> Workout at least 5 days (5 pts)</label>
+    <label class="quiz-item"><input type="checkbox" id="q2"> Move body daily / walk / stretch (2 pts)</label>
+    <label class="quiz-item"><input type="checkbox" id="q3"> Called at least 100 sellers (3 pts)</label>
+    <label class="quiz-item"><input type="checkbox" id="q4"> Added at least 25 new leads (2 pts)</label>
+    <label class="quiz-item"><input type="checkbox" id="q5"> Did at least 10 follow-ups (2 pts)</label>
+    <label class="quiz-item"><input type="checkbox" id="q6"> Analyzed at least 5 deals (2 pts)</label>
+    <label class="quiz-item"><input type="checkbox" id="q7"> Worked at least 5 hours on life goal (5 pts)</label>
+  </div>
+
+  <div class="topbar" style="margin-top:12px">
+    <button onclick="gradeWeek()">Grade My Week</button>
+    <button onclick="clearWeeklyQuiz()">Clear Quiz</button>
+  </div>
+
+  <div class="stats" style="margin-top:12px">
+    <div class="stat">
+      <h3>Weekly Quiz Score</h3>
+      <div id="weeklyQuizScore" class="big">0 / 21</div>
+    </div>
+    <div class="stat">
+      <h3>Weekly Quiz Grade</h3>
+      <div id="weeklyQuizGrade" class="big">F</div>
+    </div>
+  </div>
+
+  <div id="weeklyQuizSummary" class="report-result">
+    Teacher Comment: —<br>
+    Reward If I Get An A: —
+  </div>
+</div>
+
+<div class="card">
+  <h2>🏆 Monthly Report Card</h2>
+  <div class="small">Track how many A, B, C, D, and F weeks you had in the month.</div>
+
+  <div class="form-grid">
+    <div>
+      <div class="small">Month</div>
+      <input type="month" id="reportMonth">
+    </div>
+    <div>
+      <div class="small">Weeks with A</div>
+      <input type="number" id="aWeeks" min="0" value="0">
+    </div>
+    <div>
+      <div class="small">Weeks with B</div>
+      <input type="number" id="bWeeks" min="0" value="0">
+    </div>
+    <div>
+      <div class="small">Weeks with C</div>
+      <input type="number" id="cWeeks" min="0" value="0">
+    </div>
+    <div>
+      <div class="small">Weeks with D</div>
+      <input type="number" id="dWeeks" min="0" value="0">
+    </div>
+    <div>
+      <div class="small">Weeks with F</div>
+      <input type="number" id="fWeeks" min="0" value="0">
+    </div>
+  </div>
+
+  <div class="topbar" style="margin-top:12px">
+    <button onclick="monthlyResult()">Calculate Monthly Result</button>
+    <button onclick="clearMonthlyReport()">Clear Report</button>
+  </div>
+
+  <div id="monthResult" class="report-result">
+    No monthly report yet.
   </div>
 </div>
 
@@ -182,6 +277,8 @@ input[type="text"],input[type="time"],input[type="date"]{width:100%;box-sizing:b
 
 <script>
 const STORAGE_KEY = "lb_top3_data_v3";
+const QUIZ_STORAGE_KEY = "lb_top3_weekly_quiz_v1";
+const REPORT_STORAGE_KEY = "lb_top3_monthly_report_v1";
 
 const dateInput = document.getElementById("dateInput");
 const workoutInput = document.getElementById("workoutInput");
@@ -212,6 +309,29 @@ const modalWorkoutStartEl = document.getElementById("modalWorkoutStart");
 const modalWorkoutStopEl = document.getElementById("modalWorkoutStop");
 const modalGoalNameEl = document.getElementById("modalGoalName");
 const modalRealEstateWorkEl = document.getElementById("modalRealEstateWork");
+
+const quizWeekOfEl = document.getElementById("quizWeekOf");
+const quizCommentEl = document.getElementById("quizComment");
+const quizRewardEl = document.getElementById("quizReward");
+const weeklyQuizScoreEl = document.getElementById("weeklyQuizScore");
+const weeklyQuizGradeEl = document.getElementById("weeklyQuizGrade");
+const weeklyQuizSummaryEl = document.getElementById("weeklyQuizSummary");
+
+const q1El = document.getElementById("q1");
+const q2El = document.getElementById("q2");
+const q3El = document.getElementById("q3");
+const q4El = document.getElementById("q4");
+const q5El = document.getElementById("q5");
+const q6El = document.getElementById("q6");
+const q7El = document.getElementById("q7");
+
+const reportMonthEl = document.getElementById("reportMonth");
+const aWeeksEl = document.getElementById("aWeeks");
+const bWeeksEl = document.getElementById("bWeeks");
+const cWeeksEl = document.getElementById("cWeeks");
+const dWeeksEl = document.getElementById("dWeeks");
+const fWeeksEl = document.getElementById("fWeeks");
+const monthResultEl = document.getElementById("monthResult");
 
 let currentMonth = new Date();
 let selectedDate = null;
@@ -245,6 +365,45 @@ function cleanEntry(entry){
     goalName: entry.goalName || "",
     realEstateWork: entry.realEstateWork || ""
   };
+}
+
+function getQuizData(){
+  const raw = localStorage.getItem(QUIZ_STORAGE_KEY);
+  return raw ? JSON.parse(raw) : {
+    weekOf: "",
+    q1: false,
+    q2: false,
+    q3: false,
+    q4: false,
+    q5: false,
+    q6: false,
+    q7: false,
+    score: 0,
+    grade: "F",
+    comment: "",
+    reward: ""
+  };
+}
+
+function setQuizData(data){
+  localStorage.setItem(QUIZ_STORAGE_KEY, JSON.stringify(data));
+}
+
+function getReportData(){
+  const raw = localStorage.getItem(REPORT_STORAGE_KEY);
+  return raw ? JSON.parse(raw) : {
+    month: "",
+    aWeeks: 0,
+    bWeeks: 0,
+    cWeeks: 0,
+    dWeeks: 0,
+    fWeeks: 0,
+    summary: "No monthly report yet."
+  };
+}
+
+function setReportData(data){
+  localStorage.setItem(REPORT_STORAGE_KEY, JSON.stringify(data));
 }
 
 function checkin(){
@@ -393,6 +552,163 @@ function renderDashboard(){
   }
 
   streakEl.textContent = streak + " day" + (streak === 1 ? "" : "s");
+}
+
+function gradeFromScore(score){
+  if(score >= 19) return "A";
+  if(score >= 17) return "B";
+  if(score >= 14) return "C";
+  if(score >= 10) return "D";
+  return "F";
+}
+
+function gradeWithLabel(score){
+  if(score >= 19) return "A ⭐ Excellent";
+  if(score >= 17) return "B 👍 Good";
+  if(score >= 14) return "C 🙂 Average";
+  if(score >= 10) return "D ⚠ Needs Work";
+  return "F ❌ Failing";
+}
+
+function renderWeeklyQuiz(){
+  const quiz = getQuizData();
+
+  quizWeekOfEl.value = quiz.weekOf || "";
+  q1El.checked = !!quiz.q1;
+  q2El.checked = !!quiz.q2;
+  q3El.checked = !!quiz.q3;
+  q4El.checked = !!quiz.q4;
+  q5El.checked = !!quiz.q5;
+  q6El.checked = !!quiz.q6;
+  q7El.checked = !!quiz.q7;
+  quizCommentEl.value = quiz.comment || "";
+  quizRewardEl.value = quiz.reward || "";
+
+  weeklyQuizScoreEl.textContent = (quiz.score || 0) + " / 21";
+  weeklyQuizGradeEl.textContent = quiz.grade || "F";
+
+  weeklyQuizSummaryEl.innerHTML =
+    "Teacher Comment: " + escapeHtml(quiz.comment || "—") + "<br>" +
+    "Reward If I Get An A: " + escapeHtml(quiz.reward || "—");
+}
+
+function gradeWeek(){
+  let score = 0;
+
+  if(q1El.checked) score += 5;
+  if(q2El.checked) score += 2;
+  if(q3El.checked) score += 3;
+  if(q4El.checked) score += 2;
+  if(q5El.checked) score += 2;
+  if(q6El.checked) score += 2;
+  if(q7El.checked) score += 5;
+
+  const grade = gradeFromScore(score);
+
+  const quiz = {
+    weekOf: quizWeekOfEl.value,
+    q1: q1El.checked,
+    q2: q2El.checked,
+    q3: q3El.checked,
+    q4: q4El.checked,
+    q5: q5El.checked,
+    q6: q6El.checked,
+    q7: q7El.checked,
+    score,
+    grade,
+    comment: quizCommentEl.value.trim(),
+    reward: quizRewardEl.value.trim()
+  };
+
+  setQuizData(quiz);
+  renderWeeklyQuiz();
+}
+
+function clearWeeklyQuiz(){
+  const emptyQuiz = {
+    weekOf: "",
+    q1: false,
+    q2: false,
+    q3: false,
+    q4: false,
+    q5: false,
+    q6: false,
+    q7: false,
+    score: 0,
+    grade: "F",
+    comment: "",
+    reward: ""
+  };
+  setQuizData(emptyQuiz);
+  renderWeeklyQuiz();
+}
+
+function renderMonthlyReport(){
+  const report = getReportData();
+
+  reportMonthEl.value = report.month || "";
+  aWeeksEl.value = report.aWeeks ?? 0;
+  bWeeksEl.value = report.bWeeks ?? 0;
+  cWeeksEl.value = report.cWeeks ?? 0;
+  dWeeksEl.value = report.dWeeks ?? 0;
+  fWeeksEl.value = report.fWeeks ?? 0;
+
+  monthResultEl.innerHTML = report.summary || "No monthly report yet.";
+}
+
+function monthlyResult(){
+  const month = reportMonthEl.value;
+  const a = Number(aWeeksEl.value || 0);
+  const b = Number(bWeeksEl.value || 0);
+  const c = Number(cWeeksEl.value || 0);
+  const d = Number(dWeeksEl.value || 0);
+  const f = Number(fWeeksEl.value || 0);
+
+  const total = a + b + c + d + f;
+  const weightedScore = (a * 21) + (b * 18) + (c * 15) + (d * 11) + (f * 5);
+  const averageScore = total ? Math.round((weightedScore / total) * 10) / 10 : 0;
+  const overallGrade = total ? gradeFromScore(Math.round(averageScore)) : "F";
+
+  let monthMessage = "⚠ Reset Next Month";
+  if(a >= 3) monthMessage = "⭐ Excellent Month";
+  else if(a >= 2) monthMessage = "👍 Strong Progress";
+  else if(a >= 1) monthMessage = "🙂 Improving";
+  else monthMessage = "⚠ Reset Next Month";
+
+  const summary =
+    "<b>Month:</b> " + escapeHtml(month || "—") + "<br>" +
+    "<b>Total Weeks Tracked:</b> " + total + "<br>" +
+    "<b>A Weeks:</b> " + a + " | <b>B Weeks:</b> " + b + " | <b>C Weeks:</b> " + c + " | <b>D Weeks:</b> " + d + " | <b>F Weeks:</b> " + f + "<br>" +
+    "<b>Average Weekly Score:</b> " + averageScore + " / 21<br>" +
+    "<b>Overall Monthly Grade:</b> " + overallGrade + "<br>" +
+    "<b>Monthly Result:</b> " + monthMessage;
+
+  const report = {
+    month,
+    aWeeks: a,
+    bWeeks: b,
+    cWeeks: c,
+    dWeeks: d,
+    fWeeks: f,
+    summary
+  };
+
+  setReportData(report);
+  renderMonthlyReport();
+}
+
+function clearMonthlyReport(){
+  const emptyReport = {
+    month: "",
+    aWeeks: 0,
+    bWeeks: 0,
+    cWeeks: 0,
+    dWeeks: 0,
+    fWeeks: 0,
+    summary: "No monthly report yet."
+  };
+  setReportData(emptyReport);
+  renderMonthlyReport();
 }
 
 function changeMonth(offset){
@@ -546,6 +862,8 @@ window.addEventListener("click", function(e){
 function renderAll(){
   renderTable();
   renderDashboard();
+  renderWeeklyQuiz();
+  renderMonthlyReport();
   renderCalendar();
 }
 
