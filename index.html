@@ -4,235 +4,1160 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Lessie Bea Daily Top 3</title>
-
 <style>
-body{font-family:Arial;background:#fff0f5;padding:20px;color:#333}
+body{font-family:Arial,sans-serif;background:#fff0f5;padding:20px;color:#333}
 h1,h2,h3{color:#c71585}
 .card{background:#fff;border:1px solid #f3c1d9;border-radius:12px;padding:16px;margin-bottom:20px}
-input,button,textarea{padding:8px;border-radius:8px;border:1px solid #ccc}
+.topbar{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+input,button,select,textarea{padding:8px;border-radius:8px;border:1px solid #ccc;font-size:14px;font-family:Arial,sans-serif}
 button{background:#ffb6c1;font-weight:bold;cursor:pointer;border:none}
-table{width:100%;border-collapse:collapse}
-th,td{border:1px solid #ddd;padding:8px;text-align:center}
+button:hover{opacity:.9}
+.checks{display:flex;gap:12px;margin-top:12px;flex-wrap:wrap}
+.checkbox{background:#fff;border:1px solid #f3c1d9;padding:8px 12px;border-radius:10px}
+.form-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px;margin-top:12px}
+.full{grid-column:1/-1}
+table{width:100%;border-collapse:collapse;background:#fff}
+th,td{border:1px solid #ddd;padding:8px;text-align:center;vertical-align:middle}
 th{background:#ffb6c1}
-.status{width:35px;height:35px;border:none;border-radius:8px}
-.done{background:#d8f5d0}
+.status{width:38px;height:38px;border-radius:10px;border:none;font-size:22px;cursor:pointer;background:#eee}
+.done{background:#d8f5d0;color:#0b7a22}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px}
+.stat{background:#fff;border:1px solid #f3c1d9;border-radius:12px;padding:12px;text-align:center}
+.big{font-size:28px;font-weight:bold}
+.calendar{display:grid;grid-template-columns:repeat(7,1fr);gap:6px}
+.calhead{background:#ffb6c1;padding:8px;text-align:center;font-weight:bold;border-radius:8px}
+.day{background:#fff;border:1px solid #ddd;border-radius:10px;min-height:170px;padding:6px;font-size:12px;cursor:pointer}
+.day:hover{background:#fff7fb}
+.empty{background:#f9f9f9;cursor:default}
+.today{outline:2px solid #c71585}
+.badge{display:block;margin:2px 0;padding:2px 4px;border-radius:6px;word-break:break-word}
+.ok{background:#d8f5d0}
+.no{background:#f8d7da}
+.modal{position:fixed;inset:0;background:rgba(0,0,0,.5);display:none;align-items:center;justify-content:center;padding:10px}
+.modalbox{background:#fff;padding:20px;border-radius:16px;width:95%;max-width:700px;max-height:90vh;overflow:auto}
+.small{font-size:12px;color:#666}
+.left{text-align:left;min-width:160px}
+textarea{width:100%;min-height:70px;resize:vertical}
+input[type="text"],input[type="time"],input[type="date"],input[type="number"],input[type="month"]{width:100%;box-sizing:border-box}
+.nowrap{white-space:nowrap}
+.quiz-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px;margin-top:12px}
+.quiz-item{background:#fff;border:1px solid #f3c1d9;padding:10px;border-radius:10px}
+.report-result{margin-top:12px;padding:12px;border-radius:10px;background:#fff7fb;border:1px solid #f3c1d9}
+.history-table-wrap{overflow:auto;margin-top:12px}
+.note-box{margin-top:12px;padding:10px;border-radius:10px;background:#fff7fb;border:1px solid #f3c1d9}
+.action-btn{background:#c71585;color:#fff}
+.delete-btn{background:#f8d7da}
+.section-label{font-weight:bold;color:#c71585;margin-top:16px;margin-bottom:8px}
 </style>
-
 </head>
 <body>
 
 <h1>💜 Lessie Bea Daily Top 3</h1>
 
 <div class="card">
-<input type="date" id="date">
-<label><input type="checkbox" id="workout"> Workout</label>
-<label><input type="checkbox" id="wholesale"> Wholesale</label>
-<label><input type="checkbox" id="goal"> Goal</label>
-<br><br>
-<input id="type" placeholder="Workout Type">
-<input type="time" id="start">
-<input type="time" id="stop">
-<input id="goalname" placeholder="Goal Name">
-<textarea id="rework" placeholder="Real Estate Work"></textarea>
-<br><br>
-<button onclick="saveDay()">Check-In</button>
+  <div class="topbar">
+    <input type="date" id="dateInput">
+    <button onclick="checkin()">Check-In</button>
+  </div>
+
+  <div class="checks">
+    <label class="checkbox"><input type="checkbox" id="workoutInput"> Workout</label>
+    <label class="checkbox"><input type="checkbox" id="wholesaleInput"> Wholesale</label>
+    <label class="checkbox"><input type="checkbox" id="goalInput"> Life Goal</label>
+  </div>
+
+  <div class="form-grid">
+    <div>
+      <div class="small">Workout Type</div>
+      <input type="text" id="workoutTypeInput" placeholder="Walking, weights, treadmill">
+    </div>
+    <div>
+      <div class="small">Workout Start</div>
+      <input type="time" id="workoutStartInput">
+    </div>
+    <div>
+      <div class="small">Workout Stop</div>
+      <input type="time" id="workoutStopInput">
+    </div>
+    <div>
+      <div class="small">Goal Name I'm Working On</div>
+      <input type="text" id="goalNameInput" placeholder="GED, Teeth, Bookkeeping, Home">
+    </div>
+    <div class="full">
+      <div class="small">What I Worked On in Real Estate</div>
+      <textarea id="realEstateWorkInput" placeholder="Called 20 leads, follow-ups, comped property, texted sellers..."></textarea>
+    </div>
+  </div>
 </div>
 
 <div class="card">
-<h2>🏆 Weekly Quiz</h2>
-<input type="date" id="weekof">
-<br><br>
-<label><input type="checkbox" id="q1"> Workout 5 days</label><br>
-<label><input type="checkbox" id="q2"> Move daily</label><br>
-<label><input type="checkbox" id="q3"> Call 100 sellers</label><br>
-<label><input type="checkbox" id="q4"> Add 25 leads</label><br>
-<label><input type="checkbox" id="q5"> 10 followups</label><br>
-<label><input type="checkbox" id="q6"> Analyze 5 deals</label><br>
-<label><input type="checkbox" id="q7"> 5 hours goal work</label><br><br>
+  <h2>Dashboard</h2>
+  <div class="stats">
+    <div class="stat">
+      <h3>🔥 Streak</h3>
+      <div id="streak" class="big">0 days</div>
+    </div>
 
-<button onclick="gradeWeek()">Grade My Week</button>
-<button onclick="saveWeek()">⭐ Save This Week</button>
+    <div class="stat">
+      <h3>🏆 Weekly Grade</h3>
+      <div id="grade" class="big">F</div>
+      <div class="small" style="margin-top:8px">
+        A = 19-21 ⭐ Excellent<br>
+        B = 17-18 👍 Good<br>
+        C = 14-16 🙂 Average<br>
+        D = 10-13 ⚠ Needs Work<br>
+        F = 0-9 ❌ Failing
+      </div>
+    </div>
 
-<h3 id="wscore">0 / 21</h3>
-<h3 id="wgrade">F</h3>
-
-<h3>Saved Weekly History</h3>
-<table>
-<thead><tr><th>Week</th><th>Score</th><th>Grade</th></tr></thead>
-<tbody id="whistory"></tbody>
-</table>
+    <div class="stat">
+      <h3>Score</h3>
+      <div id="score" class="big">0 / 21</div>
+    </div>
+  </div>
 </div>
 
 <div class="card">
-<h2>🏆 Monthly Report</h2>
-<input type="month" id="month">
-<button onclick="loadMonth()">Load From Weeks</button>
-<button onclick="saveMonth()">Save Month</button>
+  <h2>⭐ Weekly Top-3 Progress Quiz</h2>
+  <div class="small">Take this at the end of each week like a real report from your teacher.</div>
 
-<h3 id="mresult"></h3>
+  <div class="form-grid">
+    <div>
+      <div class="small">Week Of</div>
+      <input type="date" id="quizWeekOf">
+    </div>
+    <div>
+      <div class="small">Teacher Comment</div>
+      <input type="text" id="quizComment" placeholder="What did I do well or need to improve?">
+    </div>
+    <div>
+      <div class="small">My Reward If I Get An A</div>
+      <input type="text" id="quizReward" placeholder="Dinner, self-care, save for shop...">
+    </div>
+  </div>
 
-<table>
-<thead><tr><th>Month</th><th>Grade</th></tr></thead>
-<tbody id="mhistory"></tbody>
-</table>
+  <div class="quiz-grid">
+    <label class="quiz-item"><input type="checkbox" id="q1"> Workout at least 5 days (5 pts)</label>
+    <label class="quiz-item"><input type="checkbox" id="q2"> Move body daily / walk / stretch (2 pts)</label>
+    <label class="quiz-item"><input type="checkbox" id="q3"> Called at least 100 sellers (3 pts)</label>
+    <label class="quiz-item"><input type="checkbox" id="q4"> Added at least 25 new leads (2 pts)</label>
+    <label class="quiz-item"><input type="checkbox" id="q5"> Did at least 10 follow-ups (2 pts)</label>
+    <label class="quiz-item"><input type="checkbox" id="q6"> Analyzed at least 5 deals (2 pts)</label>
+    <label class="quiz-item"><input type="checkbox" id="q7"> Worked at least 5 hours on life goal (5 pts)</label>
+  </div>
+
+  <div class="topbar" style="margin-top:12px">
+    <button onclick="gradeWeek()">Grade My Week</button>
+    <button class="action-btn" onclick="saveThisWeek()">Save This Week</button>
+    <button onclick="clearWeeklyQuiz()">Clear Quiz</button>
+  </div>
+
+  <div class="stats" style="margin-top:12px">
+    <div class="stat">
+      <h3>Weekly Quiz Score</h3>
+      <div id="weeklyQuizScore" class="big">0 / 21</div>
+    </div>
+    <div class="stat">
+      <h3>Weekly Quiz Grade</h3>
+      <div id="weeklyQuizGrade" class="big">F</div>
+    </div>
+  </div>
+
+  <div id="weeklyQuizSummary" class="report-result">
+    Teacher Comment: —<br>
+    Reward If I Get An A: —
+  </div>
+
+  <div id="weeklySaveMessage" class="note-box">No saved weekly grade yet.</div>
+
+  <div class="section-label">Saved Weekly Grade History</div>
+  <div class="history-table-wrap">
+    <table id="weeklyHistoryTable">
+      <thead>
+        <tr>
+          <th>Week Of</th>
+          <th>Quiz Score</th>
+          <th>Quiz Grade</th>
+          <th>Teacher Comment</th>
+          <th>Reward</th>
+          <th>Saved On</th>
+          <th>Delete</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+  </div>
 </div>
 
 <div class="card">
-<table>
-<thead>
-<tr>
-<th>Date</th>
-<th>Workout</th>
-<th>Wholesale</th>
-<th>Goal</th>
-<th>Type</th>
-<th>Start</th>
-<th>Stop</th>
-<th>Goal Name</th>
-<th>Real Estate</th>
-<th>Delete</th>
-</tr>
-</thead>
-<tbody id="days"></tbody>
-</table>
+  <h2>🏆 Monthly Report Card</h2>
+  <div class="small">Track how many A, B, C, D, and F weeks you had in the month.</div>
+
+  <div class="form-grid">
+    <div>
+      <div class="small">Month</div>
+      <input type="month" id="reportMonth">
+    </div>
+    <div>
+      <div class="small">Weeks with A</div>
+      <input type="number" id="aWeeks" min="0" value="0">
+    </div>
+    <div>
+      <div class="small">Weeks with B</div>
+      <input type="number" id="bWeeks" min="0" value="0">
+    </div>
+    <div>
+      <div class="small">Weeks with C</div>
+      <input type="number" id="cWeeks" min="0" value="0">
+    </div>
+    <div>
+      <div class="small">Weeks with D</div>
+      <input type="number" id="dWeeks" min="0" value="0">
+    </div>
+    <div>
+      <div class="small">Weeks with F</div>
+      <input type="number" id="fWeeks" min="0" value="0">
+    </div>
+  </div>
+
+  <div class="topbar" style="margin-top:12px">
+    <button onclick="monthlyResult()">Calculate Monthly Result</button>
+    <button class="action-btn" onclick="loadMonthFromSavedWeeks()">Load Month From Saved Weeks</button>
+    <button class="action-btn" onclick="saveThisMonth()">Save This Month</button>
+    <button onclick="clearMonthlyReport()">Clear Report</button>
+  </div>
+
+  <div id="monthResult" class="report-result">
+    No monthly report yet.
+  </div>
+
+  <div id="monthlySaveMessage" class="note-box">No saved monthly result yet.</div>
+
+  <div class="section-label">Saved Monthly History</div>
+  <div class="history-table-wrap">
+    <table id="monthlyHistoryTable">
+      <thead>
+        <tr>
+          <th>Month</th>
+          <th>Total Weeks</th>
+          <th>A</th>
+          <th>B</th>
+          <th>C</th>
+          <th>D</th>
+          <th>F</th>
+          <th>Average Score</th>
+          <th>Overall Grade</th>
+          <th>Monthly Result</th>
+          <th>Saved On</th>
+          <th>Delete</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+  </div>
+</div>
+
+<div class="card" style="overflow:auto">
+  <table id="tbl">
+    <thead>
+      <tr>
+        <th>Date</th>
+        <th>Workout</th>
+        <th>Wholesale</th>
+        <th>Goal</th>
+        <th>Workout Type</th>
+        <th>Start</th>
+        <th>Stop</th>
+        <th>Goal Name</th>
+        <th>Real Estate Work</th>
+        <th>Delete</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+</div>
+
+<div class="card">
+  <h2>Calendar</h2>
+  <div class="topbar" style="margin-bottom:10px">
+    <button onclick="changeMonth(-1)">Prev</button>
+    <h3 id="monthTitle" style="margin:0"></h3>
+    <button onclick="changeMonth(1)">Next</button>
+  </div>
+  <div class="calendar" id="heads"></div>
+  <div class="calendar" id="grid"></div>
+</div>
+
+<div class="modal" id="modal">
+  <div class="modalbox">
+    <h3 id="modalDate"></h3>
+
+    <div class="checks">
+      <label class="checkbox"><input type="checkbox" id="modalWorkout"> Workout</label>
+      <label class="checkbox"><input type="checkbox" id="modalWholesale"> Wholesale</label>
+      <label class="checkbox"><input type="checkbox" id="modalGoal"> Goal</label>
+    </div>
+
+    <div class="form-grid">
+      <div>
+        <div class="small">Workout Type</div>
+        <input type="text" id="modalWorkoutType" placeholder="Walking, weights, treadmill">
+      </div>
+      <div>
+        <div class="small">Workout Start</div>
+        <input type="time" id="modalWorkoutStart">
+      </div>
+      <div>
+        <div class="small">Workout Stop</div>
+        <input type="time" id="modalWorkoutStop">
+      </div>
+      <div>
+        <div class="small">Goal Name I'm Working On</div>
+        <input type="text" id="modalGoalName" placeholder="GED, Teeth, Bookkeeping, Home">
+      </div>
+      <div class="full">
+        <div class="small">What I Worked On in Real Estate</div>
+        <textarea id="modalRealEstateWork" placeholder="Called 20 leads, follow-ups, comped property, texted sellers..."></textarea>
+      </div>
+    </div>
+
+    <br>
+    <button onclick="saveModal()">Save</button>
+    <button onclick="deleteModal()">Delete</button>
+    <button onclick="closeModal()">Cancel</button>
+  </div>
 </div>
 
 <script>
+const STORAGE_KEY = "lb_top3_data_v3";
+const QUIZ_STORAGE_KEY = "lb_top3_weekly_quiz_v1";
+const REPORT_STORAGE_KEY = "lb_top3_monthly_report_v1";
+const WEEKLY_HISTORY_KEY = "lb_top3_weekly_history_v1";
+const MONTHLY_HISTORY_KEY = "lb_top3_monthly_history_v1";
 
-const STORAGE_KEY="lb_top3_data_v3";
-const WEEKLY_KEY="lb_top3_weekly_history_v1";
-const MONTHLY_KEY="lb_top3_monthly_history_v1";
+const dateInput = document.getElementById("dateInput");
+const workoutInput = document.getElementById("workoutInput");
+const wholesaleInput = document.getElementById("wholesaleInput");
+const goalInput = document.getElementById("goalInput");
+const workoutTypeInput = document.getElementById("workoutTypeInput");
+const workoutStartInput = document.getElementById("workoutStartInput");
+const workoutStopInput = document.getElementById("workoutStopInput");
+const goalNameInput = document.getElementById("goalNameInput");
+const realEstateWorkInput = document.getElementById("realEstateWorkInput");
 
-function getDays(){return JSON.parse(localStorage.getItem(STORAGE_KEY)||"[]")}
-function setDays(d){localStorage.setItem(STORAGE_KEY,JSON.stringify(d));renderDays()}
+const tblBody = document.querySelector("#tbl tbody");
+const streakEl = document.getElementById("streak");
+const gradeEl = document.getElementById("grade");
+const scoreEl = document.getElementById("score");
 
-function saveDay(){
-let d=getDays();
-let date=document.getElementById("date").value;
-if(!date)return alert("Pick date");
-let obj={
-date,
-workout:workout.checked,
-wholesale:wholesale.checked,
-goal:goal.checked,
-type:type.value,
-start:start.value,
-stop:stop.value,
-goalname:goalname.value,
-rework:rework.value
-};
-let i=d.findIndex(x=>x.date===date);
-if(i>-1)d[i]=obj; else d.push(obj);
-setDays(d);
+const headsEl = document.getElementById("heads");
+const gridEl = document.getElementById("grid");
+const monthTitleEl = document.getElementById("monthTitle");
+
+const modalEl = document.getElementById("modal");
+const modalDateEl = document.getElementById("modalDate");
+const modalWorkoutEl = document.getElementById("modalWorkout");
+const modalWholesaleEl = document.getElementById("modalWholesale");
+const modalGoalEl = document.getElementById("modalGoal");
+const modalWorkoutTypeEl = document.getElementById("modalWorkoutType");
+const modalWorkoutStartEl = document.getElementById("modalWorkoutStart");
+const modalWorkoutStopEl = document.getElementById("modalWorkoutStop");
+const modalGoalNameEl = document.getElementById("modalGoalName");
+const modalRealEstateWorkEl = document.getElementById("modalRealEstateWork");
+
+const quizWeekOfEl = document.getElementById("quizWeekOf");
+const quizCommentEl = document.getElementById("quizComment");
+const quizRewardEl = document.getElementById("quizReward");
+const weeklyQuizScoreEl = document.getElementById("weeklyQuizScore");
+const weeklyQuizGradeEl = document.getElementById("weeklyQuizGrade");
+const weeklyQuizSummaryEl = document.getElementById("weeklyQuizSummary");
+const weeklySaveMessageEl = document.getElementById("weeklySaveMessage");
+
+const q1El = document.getElementById("q1");
+const q2El = document.getElementById("q2");
+const q3El = document.getElementById("q3");
+const q4El = document.getElementById("q4");
+const q5El = document.getElementById("q5");
+const q6El = document.getElementById("q6");
+const q7El = document.getElementById("q7");
+
+const reportMonthEl = document.getElementById("reportMonth");
+const aWeeksEl = document.getElementById("aWeeks");
+const bWeeksEl = document.getElementById("bWeeks");
+const cWeeksEl = document.getElementById("cWeeks");
+const dWeeksEl = document.getElementById("dWeeks");
+const fWeeksEl = document.getElementById("fWeeks");
+const monthResultEl = document.getElementById("monthResult");
+const monthlySaveMessageEl = document.getElementById("monthlySaveMessage");
+
+const weeklyHistoryBody = document.querySelector("#weeklyHistoryTable tbody");
+const monthlyHistoryBody = document.querySelector("#monthlyHistoryTable tbody");
+
+let currentMonth = new Date();
+let selectedDate = null;
+
+function escapeHtml(text){
+  const div = document.createElement("div");
+  div.textContent = text || "";
+  return div.innerHTML;
 }
 
-function renderDays(){
-let d=getDays();
-let html="";
-d.sort((a,b)=>a.date.localeCompare(b.date));
-d.forEach(x=>{
-html+=`<tr>
-<td>${x.date}</td>
-<td><button class="status ${x.workout?'done':''}" onclick="toggle('${x.date}','workout')">${x.workout?'✔':''}</button></td>
-<td><button class="status ${x.wholesale?'done':''}" onclick="toggle('${x.date}','wholesale')">${x.wholesale?'✔':''}</button></td>
-<td><button class="status ${x.goal?'done':''}" onclick="toggle('${x.date}','goal')">${x.goal?'✔':''}</button></td>
-<td>${x.type||""}</td>
-<td>${x.start||""}</td>
-<td>${x.stop||""}</td>
-<td>${x.goalname||""}</td>
-<td>${x.rework||""}</td>
-<td><button onclick="del('${x.date}')">X</button></td>
-</tr>`
-});
-days.innerHTML=html;
+function todayStamp(){
+  const d = new Date();
+  return d.toLocaleString();
 }
 
-function toggle(date,f){
-let d=getDays();
-let x=d.find(a=>a.date===date);
-x[f]=!x[f];
-setDays(d);
+function getData(){
+  const raw = localStorage.getItem(STORAGE_KEY);
+  const arr = raw ? JSON.parse(raw) : [];
+  return arr.sort((a,b)=>a.date.localeCompare(b.date));
 }
 
-function del(date){
-setDays(getDays().filter(x=>x.date!==date));
+function setData(arr){
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(arr));
+  renderAll();
+}
+
+function cleanEntry(entry){
+  return {
+    date: entry.date || "",
+    workout: !!entry.workout,
+    wholesale: !!entry.wholesale,
+    goal: !!entry.goal,
+    workoutType: entry.workoutType || "",
+    workoutStart: entry.workoutStart || "",
+    workoutStop: entry.workoutStop || "",
+    goalName: entry.goalName || "",
+    realEstateWork: entry.realEstateWork || ""
+  };
+}
+
+function getQuizData(){
+  const raw = localStorage.getItem(QUIZ_STORAGE_KEY);
+  return raw ? JSON.parse(raw) : {
+    weekOf: "",
+    q1: false,
+    q2: false,
+    q3: false,
+    q4: false,
+    q5: false,
+    q6: false,
+    q7: false,
+    score: 0,
+    grade: "F",
+    comment: "",
+    reward: ""
+  };
+}
+
+function setQuizData(data){
+  localStorage.setItem(QUIZ_STORAGE_KEY, JSON.stringify(data));
+}
+
+function getReportData(){
+  const raw = localStorage.getItem(REPORT_STORAGE_KEY);
+  return raw ? JSON.parse(raw) : {
+    month: "",
+    aWeeks: 0,
+    bWeeks: 0,
+    cWeeks: 0,
+    dWeeks: 0,
+    fWeeks: 0,
+    averageScore: 0,
+    totalWeeks: 0,
+    overallGrade: "F",
+    monthMessage: "⚠ Reset Next Month",
+    summary: "No monthly report yet."
+  };
+}
+
+function setReportData(data){
+  localStorage.setItem(REPORT_STORAGE_KEY, JSON.stringify(data));
+}
+
+function getWeeklyHistory(){
+  const raw = localStorage.getItem(WEEKLY_HISTORY_KEY);
+  const arr = raw ? JSON.parse(raw) : [];
+  return arr.sort((a,b)=>a.weekOf.localeCompare(b.weekOf));
+}
+
+function setWeeklyHistory(arr){
+  localStorage.setItem(WEEKLY_HISTORY_KEY, JSON.stringify(arr));
+}
+
+function getMonthlyHistory(){
+  const raw = localStorage.getItem(MONTHLY_HISTORY_KEY);
+  const arr = raw ? JSON.parse(raw) : [];
+  return arr.sort((a,b)=>a.month.localeCompare(b.month));
+}
+
+function setMonthlyHistory(arr){
+  localStorage.setItem(MONTHLY_HISTORY_KEY, JSON.stringify(arr));
+}
+
+function checkin(){
+  const date = dateInput.value;
+  if(!date){
+    alert("Pick a date");
+    return;
+  }
+
+  const entry = cleanEntry({
+    date,
+    workout: workoutInput.checked,
+    wholesale: wholesaleInput.checked,
+    goal: goalInput.checked,
+    workoutType: workoutTypeInput.value.trim(),
+    workoutStart: workoutStartInput.value,
+    workoutStop: workoutStopInput.value,
+    goalName: goalNameInput.value.trim(),
+    realEstateWork: realEstateWorkInput.value.trim()
+  });
+
+  let arr = getData();
+  const index = arr.findIndex(x => x.date === date);
+
+  if(index > -1){
+    arr[index] = entry;
+  } else {
+    arr.push(entry);
+  }
+
+  setData(arr);
+
+  dateInput.value = "";
+  workoutInput.checked = false;
+  wholesaleInput.checked = false;
+  goalInput.checked = false;
+  workoutTypeInput.value = "";
+  workoutStartInput.value = "";
+  workoutStopInput.value = "";
+  goalNameInput.value = "";
+  realEstateWorkInput.value = "";
+}
+
+function toggleStatus(date, field){
+  const arr = getData();
+  const item = arr.find(x => x.date === date);
+  if(!item) return;
+  item[field] = !item[field];
+  setData(arr);
+}
+
+function deleteRow(date){
+  const arr = getData().filter(x => x.date !== date);
+  setData(arr);
+}
+
+function renderTable(){
+  const arr = getData();
+  tblBody.innerHTML = "";
+
+  arr.forEach(item => {
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
+      <td class="nowrap">${escapeHtml(item.date)}</td>
+      <td><button class="status ${item.workout ? "done" : ""}" onclick="toggleStatus('${item.date}','workout')">${item.workout ? "✔" : ""}</button></td>
+      <td><button class="status ${item.wholesale ? "done" : ""}" onclick="toggleStatus('${item.date}','wholesale')">${item.wholesale ? "✔" : ""}</button></td>
+      <td><button class="status ${item.goal ? "done" : ""}" onclick="toggleStatus('${item.date}','goal')">${item.goal ? "✔" : ""}</button></td>
+      <td class="left">${escapeHtml(item.workoutType)}</td>
+      <td class="nowrap">${escapeHtml(item.workoutStart)}</td>
+      <td class="nowrap">${escapeHtml(item.workoutStop)}</td>
+      <td class="left">${escapeHtml(item.goalName)}</td>
+      <td class="left">${escapeHtml(item.realEstateWork)}</td>
+      <td><button onclick="deleteRow('${item.date}')">X</button></td>
+    `;
+    tblBody.appendChild(tr);
+  });
+}
+
+function getStartOfWeek(date){
+  const d = new Date(date);
+  d.setHours(0,0,0,0);
+  const day = d.getDay();
+  const diff = day === 0 ? -6 : 1 - day;
+  d.setDate(d.getDate() + diff);
+  return d;
+}
+
+function getDateString(dateObj){
+  const y = dateObj.getFullYear();
+  const m = String(dateObj.getMonth() + 1).padStart(2,"0");
+  const d = String(dateObj.getDate()).padStart(2,"0");
+  return `${y}-${m}-${d}`;
+}
+
+function renderDashboard(){
+  const arr = getData();
+
+  const today = new Date();
+  const weekStart = getStartOfWeek(today);
+  const weekEnd = new Date(weekStart);
+  weekEnd.setDate(weekEnd.getDate() + 6);
+
+  let weeklyScore = 0;
+
+  arr.forEach(item => {
+    const d = new Date(item.date + "T00:00:00");
+    if(d >= weekStart && d <= weekEnd){
+      if(item.workout) weeklyScore++;
+      if(item.wholesale) weeklyScore++;
+      if(item.goal) weeklyScore++;
+    }
+  });
+
+  scoreEl.textContent = weeklyScore + " / 21";
+
+  let grade = "F";
+  if(weeklyScore >= 19) grade = "A";
+  else if(weeklyScore >= 17) grade = "B";
+  else if(weeklyScore >= 14) grade = "C";
+  else if(weeklyScore >= 10) grade = "D";
+  gradeEl.textContent = grade;
+
+  const activeDates = arr
+    .filter(x => x.workout || x.wholesale || x.goal)
+    .map(x => x.date)
+    .sort();
+
+  if(activeDates.length === 0){
+    streakEl.textContent = "0 days";
+    return;
+  }
+
+  const latest = new Date(activeDates[activeDates.length - 1] + "T00:00:00");
+  const todayOnly = new Date();
+  todayOnly.setHours(0,0,0,0);
+
+  const gap = Math.round((todayOnly - latest) / (1000 * 60 * 60 * 24));
+  if(gap > 1){
+    streakEl.textContent = "0 days";
+    return;
+  }
+
+  let streak = 1;
+  for(let i = activeDates.length - 1; i > 0; i--){
+    const curr = new Date(activeDates[i] + "T00:00:00");
+    const prev = new Date(activeDates[i - 1] + "T00:00:00");
+    const diff = Math.round((curr - prev) / (1000 * 60 * 60 * 24));
+    if(diff === 1){
+      streak++;
+    } else {
+      break;
+    }
+  }
+
+  streakEl.textContent = streak + " day" + (streak === 1 ? "" : "s");
+}
+
+function gradeFromScore(score){
+  if(score >= 19) return "A";
+  if(score >= 17) return "B";
+  if(score >= 14) return "C";
+  if(score >= 10) return "D";
+  return "F";
+}
+
+function renderWeeklyQuiz(){
+  const quiz = getQuizData();
+
+  quizWeekOfEl.value = quiz.weekOf || "";
+  q1El.checked = !!quiz.q1;
+  q2El.checked = !!quiz.q2;
+  q3El.checked = !!quiz.q3;
+  q4El.checked = !!quiz.q4;
+  q5El.checked = !!quiz.q5;
+  q6El.checked = !!quiz.q6;
+  q7El.checked = !!quiz.q7;
+  quizCommentEl.value = quiz.comment || "";
+  quizRewardEl.value = quiz.reward || "";
+
+  weeklyQuizScoreEl.textContent = (quiz.score || 0) + " / 21";
+  weeklyQuizGradeEl.textContent = quiz.grade || "F";
+
+  weeklyQuizSummaryEl.innerHTML =
+    "Teacher Comment: " + escapeHtml(quiz.comment || "—") + "<br>" +
+    "Reward If I Get An A: " + escapeHtml(quiz.reward || "—");
 }
 
 function gradeWeek(){
-let s=0;
-if(q1.checked)s+=5;
-if(q2.checked)s+=2;
-if(q3.checked)s+=3;
-if(q4.checked)s+=2;
-if(q5.checked)s+=2;
-if(q6.checked)s+=2;
-if(q7.checked)s+=5;
-wscore.innerText=s+" / 21";
-let g="F";
-if(s>=19)g="A"; else if(s>=17)g="B"; else if(s>=14)g="C"; else if(s>=10)g="D";
-wgrade.innerText=g;
+  let score = 0;
+
+  if(q1El.checked) score += 5;
+  if(q2El.checked) score += 2;
+  if(q3El.checked) score += 3;
+  if(q4El.checked) score += 2;
+  if(q5El.checked) score += 2;
+  if(q6El.checked) score += 2;
+  if(q7El.checked) score += 5;
+
+  const grade = gradeFromScore(score);
+
+  const quiz = {
+    weekOf: quizWeekOfEl.value,
+    q1: q1El.checked,
+    q2: q2El.checked,
+    q3: q3El.checked,
+    q4: q4El.checked,
+    q5: q5El.checked,
+    q6: q6El.checked,
+    q7: q7El.checked,
+    score,
+    grade,
+    comment: quizCommentEl.value.trim(),
+    reward: quizRewardEl.value.trim()
+  };
+
+  setQuizData(quiz);
+  renderWeeklyQuiz();
 }
 
-function getWeekly(){return JSON.parse(localStorage.getItem(WEEKLY_KEY)||"[]")}
-function setWeekly(w){localStorage.setItem(WEEKLY_KEY,JSON.stringify(w));renderWeekly()}
+function saveThisWeek(){
+  gradeWeek();
+  const quiz = getQuizData();
 
-function saveWeek(){
-gradeWeek();
-let w=getWeekly();
-let week=weekof.value;
-if(!week)return alert("Pick week");
-let score=parseInt(wscore.innerText);
-let grade=wgrade.innerText;
-let i=w.findIndex(x=>x.week===week);
-if(i>-1)w[i]={week,score,grade}; else w.push({week,score,grade});
-setWeekly(w);
+  if(!quiz.weekOf){
+    alert("Pick a Week Of date first.");
+    return;
+  }
+
+  let history = getWeeklyHistory();
+
+  const savedItem = {
+    weekOf: quiz.weekOf,
+    score: quiz.score || 0,
+    grade: quiz.grade || "F",
+    comment: quiz.comment || "",
+    reward: quiz.reward || "",
+    q1: !!quiz.q1,
+    q2: !!quiz.q2,
+    q3: !!quiz.q3,
+    q4: !!quiz.q4,
+    q5: !!quiz.q5,
+    q6: !!quiz.q6,
+    q7: !!quiz.q7,
+    savedOn: todayStamp()
+  };
+
+  const index = history.findIndex(x => x.weekOf === quiz.weekOf);
+  if(index > -1){
+    history[index] = savedItem;
+    weeklySaveMessageEl.innerHTML = "<b>Updated:</b> Weekly grade for " + escapeHtml(quiz.weekOf) + " was updated and saved.";
+  } else {
+    history.push(savedItem);
+    weeklySaveMessageEl.innerHTML = "<b>Saved:</b> Weekly grade for " + escapeHtml(quiz.weekOf) + " is now stored in history.";
+  }
+
+  setWeeklyHistory(history);
+  renderWeeklyHistory();
 }
 
-function renderWeekly(){
-let w=getWeekly();
-let html="";
-w.forEach(x=>{
-html+=`<tr><td>${x.week}</td><td>${x.score}</td><td>${x.grade}</td></tr>`
+function clearWeeklyQuiz(){
+  const emptyQuiz = {
+    weekOf: "",
+    q1: false,
+    q2: false,
+    q3: false,
+    q4: false,
+    q5: false,
+    q6: false,
+    q7: false,
+    score: 0,
+    grade: "F",
+    comment: "",
+    reward: ""
+  };
+  setQuizData(emptyQuiz);
+  renderWeeklyQuiz();
+}
+
+function renderWeeklyHistory(){
+  const history = getWeeklyHistory();
+  weeklyHistoryBody.innerHTML = "";
+
+  if(history.length === 0){
+    weeklyHistoryBody.innerHTML = `<tr><td colspan="7">No weekly history saved yet.</td></tr>`;
+    return;
+  }
+
+  history.forEach(item => {
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
+      <td class="nowrap">${escapeHtml(item.weekOf)}</td>
+      <td>${escapeHtml(String(item.score))} / 21</td>
+      <td>${escapeHtml(item.grade)}</td>
+      <td class="left">${escapeHtml(item.comment || "")}</td>
+      <td class="left">${escapeHtml(item.reward || "")}</td>
+      <td class="left">${escapeHtml(item.savedOn || "")}</td>
+      <td><button class="delete-btn" onclick="deleteWeeklyHistory('${item.weekOf}')">X</button></td>
+    `;
+    weeklyHistoryBody.appendChild(tr);
+  });
+}
+
+function deleteWeeklyHistory(weekOf){
+  let history = getWeeklyHistory().filter(x => x.weekOf !== weekOf);
+  setWeeklyHistory(history);
+  renderWeeklyHistory();
+}
+
+function renderMonthlyReport(){
+  const report = getReportData();
+
+  reportMonthEl.value = report.month || "";
+  aWeeksEl.value = report.aWeeks ?? 0;
+  bWeeksEl.value = report.bWeeks ?? 0;
+  cWeeksEl.value = report.cWeeks ?? 0;
+  dWeeksEl.value = report.dWeeks ?? 0;
+  fWeeksEl.value = report.fWeeks ?? 0;
+
+  monthResultEl.innerHTML = report.summary || "No monthly report yet.";
+}
+
+function buildMonthlySummary(month, a, b, c, d, f){
+  const total = a + b + c + d + f;
+  const weightedScore = (a * 21) + (b * 18) + (c * 15) + (d * 11) + (f * 5);
+  const averageScore = total ? Math.round((weightedScore / total) * 10) / 10 : 0;
+  const overallGrade = total ? gradeFromScore(Math.round(averageScore)) : "F";
+
+  let monthMessage = "⚠ Reset Next Month";
+  if(a >= 3) monthMessage = "⭐ Excellent Month";
+  else if(a >= 2) monthMessage = "👍 Strong Progress";
+  else if(a >= 1) monthMessage = "🙂 Improving";
+  else if(b >= 2) monthMessage = "🙂 Good Consistency";
+  else monthMessage = "⚠ Reset Next Month";
+
+  const summary =
+    "<b>Month:</b> " + escapeHtml(month || "—") + "<br>" +
+    "<b>Total Weeks Tracked:</b> " + total + "<br>" +
+    "<b>A Weeks:</b> " + a + " | <b>B Weeks:</b> " + b + " | <b>C Weeks:</b> " + c + " | <b>D Weeks:</b> " + d + " | <b>F Weeks:</b> " + f + "<br>" +
+    "<b>Average Weekly Score:</b> " + averageScore + " / 21<br>" +
+    "<b>Overall Monthly Grade:</b> " + overallGrade + "<br>" +
+    "<b>Monthly Result:</b> " + monthMessage;
+
+  return {
+    month,
+    aWeeks: a,
+    bWeeks: b,
+    cWeeks: c,
+    dWeeks: d,
+    fWeeks: f,
+    totalWeeks: total,
+    averageScore,
+    overallGrade,
+    monthMessage,
+    summary
+  };
+}
+
+function monthlyResult(){
+  const month = reportMonthEl.value;
+  const a = Number(aWeeksEl.value || 0);
+  const b = Number(bWeeksEl.value || 0);
+  const c = Number(cWeeksEl.value || 0);
+  const d = Number(dWeeksEl.value || 0);
+  const f = Number(fWeeksEl.value || 0);
+
+  const report = buildMonthlySummary(month, a, b, c, d, f);
+  setReportData(report);
+  renderMonthlyReport();
+}
+
+function loadMonthFromSavedWeeks(){
+  const month = reportMonthEl.value;
+  if(!month){
+    alert("Pick a month first.");
+    return;
+  }
+
+  const history = getWeeklyHistory();
+  const matches = history.filter(item => (item.weekOf || "").slice(0,7) === month);
+
+  let a = 0, b = 0, c = 0, d = 0, f = 0;
+
+  matches.forEach(item => {
+    if(item.grade === "A") a++;
+    else if(item.grade === "B") b++;
+    else if(item.grade === "C") c++;
+    else if(item.grade === "D") d++;
+    else f++;
+  });
+
+  aWeeksEl.value = a;
+  bWeeksEl.value = b;
+  cWeeksEl.value = c;
+  dWeeksEl.value = d;
+  fWeeksEl.value = f;
+
+  const report = buildMonthlySummary(month, a, b, c, d, f);
+  setReportData(report);
+  renderMonthlyReport();
+
+  monthlySaveMessageEl.innerHTML = "<b>Loaded:</b> Month totals were pulled from your saved weekly history for " + escapeHtml(month) + ".";
+}
+
+function saveThisMonth(){
+  monthlyResult();
+  const report = getReportData();
+
+  if(!report.month){
+    alert("Pick a month first.");
+    return;
+  }
+
+  let history = getMonthlyHistory();
+
+  const savedItem = {
+    month: report.month,
+    totalWeeks: report.totalWeeks || 0,
+    aWeeks: report.aWeeks || 0,
+    bWeeks: report.bWeeks || 0,
+    cWeeks: report.cWeeks || 0,
+    dWeeks: report.dWeeks || 0,
+    fWeeks: report.fWeeks || 0,
+    averageScore: report.averageScore || 0,
+    overallGrade: report.overallGrade || "F",
+    monthMessage: report.monthMessage || "⚠ Reset Next Month",
+    summary: report.summary || "",
+    savedOn: todayStamp()
+  };
+
+  const index = history.findIndex(x => x.month === report.month);
+  if(index > -1){
+    history[index] = savedItem;
+    monthlySaveMessageEl.innerHTML = "<b>Updated:</b> Monthly result for " + escapeHtml(report.month) + " was updated and saved.";
+  } else {
+    history.push(savedItem);
+    monthlySaveMessageEl.innerHTML = "<b>Saved:</b> Monthly result for " + escapeHtml(report.month) + " is now stored in history.";
+  }
+
+  setMonthlyHistory(history);
+  renderMonthlyHistory();
+}
+
+function clearMonthlyReport(){
+  const emptyReport = {
+    month: "",
+    aWeeks: 0,
+    bWeeks: 0,
+    cWeeks: 0,
+    dWeeks: 0,
+    fWeeks: 0,
+    averageScore: 0,
+    totalWeeks: 0,
+    overallGrade: "F",
+    monthMessage: "⚠ Reset Next Month",
+    summary: "No monthly report yet."
+  };
+  setReportData(emptyReport);
+  renderMonthlyReport();
+}
+
+function renderMonthlyHistory(){
+  const history = getMonthlyHistory();
+  monthlyHistoryBody.innerHTML = "";
+
+  if(history.length === 0){
+    monthlyHistoryBody.innerHTML = `<tr><td colspan="12">No monthly history saved yet.</td></tr>`;
+    return;
+  }
+
+  history.forEach(item => {
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
+      <td class="nowrap">${escapeHtml(item.month)}</td>
+      <td>${escapeHtml(String(item.totalWeeks || 0))}</td>
+      <td>${escapeHtml(String(item.aWeeks || 0))}</td>
+      <td>${escapeHtml(String(item.bWeeks || 0))}</td>
+      <td>${escapeHtml(String(item.cWeeks || 0))}</td>
+      <td>${escapeHtml(String(item.dWeeks || 0))}</td>
+      <td>${escapeHtml(String(item.fWeeks || 0))}</td>
+      <td>${escapeHtml(String(item.averageScore || 0))} / 21</td>
+      <td>${escapeHtml(item.overallGrade || "F")}</td>
+      <td class="left">${escapeHtml(item.monthMessage || "")}</td>
+      <td class="left">${escapeHtml(item.savedOn || "")}</td>
+      <td><button class="delete-btn" onclick="deleteMonthlyHistory('${item.month}')">X</button></td>
+    `;
+    monthlyHistoryBody.appendChild(tr);
+  });
+}
+
+function deleteMonthlyHistory(month){
+  let history = getMonthlyHistory().filter(x => x.month !== month);
+  setMonthlyHistory(history);
+  renderMonthlyHistory();
+}
+
+function changeMonth(offset){
+  currentMonth.setMonth(currentMonth.getMonth() + offset);
+  renderCalendar();
+}
+
+function renderCalendar(){
+  headsEl.innerHTML = "";
+  gridEl.innerHTML = "";
+
+  ["Mon","Tue","Wed","Thu","Fri","Sat","Sun"].forEach(day => {
+    const div = document.createElement("div");
+    div.className = "calhead";
+    div.textContent = day;
+    headsEl.appendChild(div);
+  });
+
+  const year = currentMonth.getFullYear();
+  const month = currentMonth.getMonth();
+
+  monthTitleEl.textContent = currentMonth.toLocaleString("default", {
+    month: "long",
+    year: "numeric"
+  });
+
+  const firstDay = new Date(year, month, 1);
+  const lastDay = new Date(year, month + 1, 0);
+
+  let startDay = firstDay.getDay();
+  startDay = startDay === 0 ? 6 : startDay - 1;
+
+  for(let i = 0; i < startDay; i++){
+    const empty = document.createElement("div");
+    empty.className = "day empty";
+    gridEl.appendChild(empty);
+  }
+
+  const arr = getData();
+  const totalDays = lastDay.getDate();
+
+  for(let day = 1; day <= totalDays; day++){
+    const dateStr = `${year}-${String(month + 1).padStart(2,"0")}-${String(day).padStart(2,"0")}`;
+    const entry = arr.find(x => x.date === dateStr);
+
+    const cell = document.createElement("div");
+    cell.className = "day";
+
+    const today = new Date();
+    const todayStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2,"0")}-${String(today.getDate()).padStart(2,"0")}`;
+    if(dateStr === todayStr){
+      cell.classList.add("today");
+    }
+
+    let html = `<b>${day}</b>`;
+
+    if(entry){
+      html += `<span class="badge ${entry.workout ? "ok" : "no"}">Workout ${entry.workout ? "✔" : "✘"}</span>`;
+      if(entry.workoutType){
+        html += `<span class="badge ok">${escapeHtml(entry.workoutType)}</span>`;
+      }
+      if(entry.workoutStart || entry.workoutStop){
+        html += `<span class="badge ok">${escapeHtml(entry.workoutStart || "--")} - ${escapeHtml(entry.workoutStop || "--")}</span>`;
+      }
+      html += `<span class="badge ${entry.wholesale ? "ok" : "no"}">Wholesale ${entry.wholesale ? "✔" : "✘"}</span>`;
+      if(entry.realEstateWork){
+        html += `<span class="badge ok">${escapeHtml(entry.realEstateWork)}</span>`;
+      }
+      html += `<span class="badge ${entry.goal ? "ok" : "no"}">Goal ${entry.goal ? "✔" : "✘"}</span>`;
+      if(entry.goalName){
+        html += `<span class="badge ok">${escapeHtml(entry.goalName)}</span>`;
+      }
+    } else {
+      html += `<span class="badge no">No check-in</span>`;
+    }
+
+    cell.innerHTML = html;
+    cell.addEventListener("click", () => openModal(dateStr));
+    gridEl.appendChild(cell);
+  }
+}
+
+function openModal(date){
+  selectedDate = date;
+  modalDateEl.textContent = date;
+
+  const entry = getData().find(x => x.date === date) || cleanEntry({
+    date,
+    workout:false,
+    wholesale:false,
+    goal:false
+  });
+
+  modalWorkoutEl.checked = entry.workout;
+  modalWholesaleEl.checked = entry.wholesale;
+  modalGoalEl.checked = entry.goal;
+  modalWorkoutTypeEl.value = entry.workoutType || "";
+  modalWorkoutStartEl.value = entry.workoutStart || "";
+  modalWorkoutStopEl.value = entry.workoutStop || "";
+  modalGoalNameEl.value = entry.goalName || "";
+  modalRealEstateWorkEl.value = entry.realEstateWork || "";
+
+  modalEl.style.display = "flex";
+}
+
+function closeModal(){
+  modalEl.style.display = "none";
+  selectedDate = null;
+}
+
+function saveModal(){
+  if(!selectedDate) return;
+
+  let arr = getData();
+  const entry = cleanEntry({
+    date: selectedDate,
+    workout: modalWorkoutEl.checked,
+    wholesale: modalWholesaleEl.checked,
+    goal: modalGoalEl.checked,
+    workoutType: modalWorkoutTypeEl.value.trim(),
+    workoutStart: modalWorkoutStartEl.value,
+    workoutStop: modalWorkoutStopEl.value,
+    goalName: modalGoalNameEl.value.trim(),
+    realEstateWork: modalRealEstateWorkEl.value.trim()
+  });
+
+  const index = arr.findIndex(x => x.date === selectedDate);
+  if(index > -1){
+    arr[index] = entry;
+  } else {
+    arr.push(entry);
+  }
+
+  setData(arr);
+  closeModal();
+}
+
+function deleteModal(){
+  if(!selectedDate) return;
+  const arr = getData().filter(x => x.date !== selectedDate);
+  setData(arr);
+  closeModal();
+}
+
+window.addEventListener("click", function(e){
+  if(e.target === modalEl){
+    closeModal();
+  }
 });
-whistory.innerHTML=html;
+
+(function initDefaultDates(){
+  const today = new Date();
+  const monday = getStartOfWeek(today);
+  if(!quizWeekOfEl.value){
+    quizWeekOfEl.value = getDateString(monday);
+  }
+  if(!reportMonthEl.value){
+    reportMonthEl.value = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2,"0")}`;
+  }
+})();
+
+function renderAll(){
+  renderTable();
+  renderDashboard();
+  renderWeeklyQuiz();
+  renderWeeklyHistory();
+  renderMonthlyReport();
+  renderMonthlyHistory();
+  renderCalendar();
 }
 
-function getMonthly(){return JSON.parse(localStorage.getItem(MONTHLY_KEY)||"[]")}
-function setMonthly(m){localStorage.setItem(MONTHLY_KEY,JSON.stringify(m));renderMonthly()}
-
-function loadMonth(){
-let m=month.value;
-let w=getWeekly().filter(x=>x.week.startsWith(m));
-let avg=Math.round(w.reduce((a,b)=>a+b.score,0)/(w.length||1));
-let g="F";
-if(avg>=19)g="A"; else if(avg>=17)g="B"; else if(avg>=14)g="C"; else if(avg>=10)g="D";
-mresult.innerText="Average "+avg+" → "+g;
-}
-
-function saveMonth(){
-let m=month.value;
-if(!m)return;
-let txt=mresult.innerText;
-let g=txt.slice(-1);
-let list=getMonthly();
-let i=list.findIndex(x=>x.month===m);
-if(i>-1)list[i]={month:m,grade:g}; else list.push({month:m,grade:g});
-setMonthly(list);
-}
-
-function renderMonthly(){
-let m=getMonthly();
-let html="";
-m.forEach(x=>{
-html+=`<tr><td>${x.month}</td><td>${x.grade}</td></tr>`
-});
-mhistory.innerHTML=html;
-}
-
-renderDays();
-renderWeekly();
-renderMonthly();
-
+renderAll();
 </script>
 
 </body>
