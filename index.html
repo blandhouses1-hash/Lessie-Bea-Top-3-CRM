@@ -43,6 +43,11 @@ input[type="text"],input[type="time"],input[type="date"],input[type="number"],in
 .quiz-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px;margin-top:12px}
 .quiz-item{background:#fff;border:1px solid #f3c1d9;padding:10px;border-radius:10px}
 .report-result{margin-top:12px;padding:12px;border-radius:10px;background:#fff7fb;border:1px solid #f3c1d9}
+.history-table-wrap{overflow:auto;margin-top:12px}
+.note-box{margin-top:12px;padding:10px;border-radius:10px;background:#fff7fb;border:1px solid #f3c1d9}
+.action-btn{background:#c71585;color:#fff}
+.delete-btn{background:#f8d7da}
+.section-label{font-weight:bold;color:#c71585;margin-top:16px;margin-bottom:8px}
 </style>
 </head>
 <body>
@@ -143,6 +148,7 @@ input[type="text"],input[type="time"],input[type="date"],input[type="number"],in
 
   <div class="topbar" style="margin-top:12px">
     <button onclick="gradeWeek()">Grade My Week</button>
+    <button class="action-btn" onclick="saveThisWeek()">Save This Week</button>
     <button onclick="clearWeeklyQuiz()">Clear Quiz</button>
   </div>
 
@@ -160,6 +166,26 @@ input[type="text"],input[type="time"],input[type="date"],input[type="number"],in
   <div id="weeklyQuizSummary" class="report-result">
     Teacher Comment: —<br>
     Reward If I Get An A: —
+  </div>
+
+  <div id="weeklySaveMessage" class="note-box">No saved weekly grade yet.</div>
+
+  <div class="section-label">Saved Weekly Grade History</div>
+  <div class="history-table-wrap">
+    <table id="weeklyHistoryTable">
+      <thead>
+        <tr>
+          <th>Week Of</th>
+          <th>Quiz Score</th>
+          <th>Quiz Grade</th>
+          <th>Teacher Comment</th>
+          <th>Reward</th>
+          <th>Saved On</th>
+          <th>Delete</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
   </div>
 </div>
 
@@ -196,11 +222,38 @@ input[type="text"],input[type="time"],input[type="date"],input[type="number"],in
 
   <div class="topbar" style="margin-top:12px">
     <button onclick="monthlyResult()">Calculate Monthly Result</button>
+    <button class="action-btn" onclick="loadMonthFromSavedWeeks()">Load Month From Saved Weeks</button>
+    <button class="action-btn" onclick="saveThisMonth()">Save This Month</button>
     <button onclick="clearMonthlyReport()">Clear Report</button>
   </div>
 
   <div id="monthResult" class="report-result">
     No monthly report yet.
+  </div>
+
+  <div id="monthlySaveMessage" class="note-box">No saved monthly result yet.</div>
+
+  <div class="section-label">Saved Monthly History</div>
+  <div class="history-table-wrap">
+    <table id="monthlyHistoryTable">
+      <thead>
+        <tr>
+          <th>Month</th>
+          <th>Total Weeks</th>
+          <th>A</th>
+          <th>B</th>
+          <th>C</th>
+          <th>D</th>
+          <th>F</th>
+          <th>Average Score</th>
+          <th>Overall Grade</th>
+          <th>Monthly Result</th>
+          <th>Saved On</th>
+          <th>Delete</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
   </div>
 </div>
 
@@ -276,9 +329,11 @@ input[type="text"],input[type="time"],input[type="date"],input[type="number"],in
 </div>
 
 <script>
-const STORAGE_KEY = "lb_top3_data_v3";
-const QUIZ_STORAGE_KEY = "lb_top3_weekly_quiz_v1";
-const REPORT_STORAGE_KEY = "lb_top3_monthly_report_v1";
+const STORAGE_KEY = "lb_top3_data_v4";
+const QUIZ_STORAGE_KEY = "lb_top3_weekly_quiz_v2";
+const REPORT_STORAGE_KEY = "lb_top3_monthly_report_v2";
+const WEEKLY_HISTORY_KEY = "lb_top3_weekly_history_v1";
+const MONTHLY_HISTORY_KEY = "lb_top3_monthly_history_v1";
 
 const dateInput = document.getElementById("dateInput");
 const workoutInput = document.getElementById("workoutInput");
@@ -316,6 +371,7 @@ const quizRewardEl = document.getElementById("quizReward");
 const weeklyQuizScoreEl = document.getElementById("weeklyQuizScore");
 const weeklyQuizGradeEl = document.getElementById("weeklyQuizGrade");
 const weeklyQuizSummaryEl = document.getElementById("weeklyQuizSummary");
+const weeklySaveMessageEl = document.getElementById("weeklySaveMessage");
 
 const q1El = document.getElementById("q1");
 const q2El = document.getElementById("q2");
@@ -332,6 +388,10 @@ const cWeeksEl = document.getElementById("cWeeks");
 const dWeeksEl = document.getElementById("dWeeks");
 const fWeeksEl = document.getElementById("fWeeks");
 const monthResultEl = document.getElementById("monthResult");
+const monthlySaveMessageEl = document.getElementById("monthlySaveMessage");
+
+const weeklyHistoryBody = document.querySelector("#weeklyHistoryTable tbody");
+const monthlyHistoryBody = document.querySelector("#monthlyHistoryTable tbody");
 
 let currentMonth = new Date();
 let selectedDate = null;
@@ -340,6 +400,11 @@ function escapeHtml(text){
   const div = document.createElement("div");
   div.textContent = text || "";
   return div.innerHTML;
+}
+
+function todayStamp(){
+  const d = new Date();
+  return d.toLocaleString();
 }
 
 function getData(){
@@ -398,12 +463,36 @@ function getReportData(){
     cWeeks: 0,
     dWeeks: 0,
     fWeeks: 0,
+    averageScore: 0,
+    totalWeeks: 0,
+    overallGrade: "F",
+    monthMessage: "⚠ Reset Next Month",
     summary: "No monthly report yet."
   };
 }
 
 function setReportData(data){
   localStorage.setItem(REPORT_STORAGE_KEY, JSON.stringify(data));
+}
+
+function getWeeklyHistory(){
+  const raw = localStorage.getItem(WEEKLY_HISTORY_KEY);
+  const arr = raw ? JSON.parse(raw) : [];
+  return arr.sort((a,b)=>a.weekOf.localeCompare(b.weekOf));
+}
+
+function setWeeklyHistory(arr){
+  localStorage.setItem(WEEKLY_HISTORY_KEY, JSON.stringify(arr));
+}
+
+function getMonthlyHistory(){
+  const raw = localStorage.getItem(MONTHLY_HISTORY_KEY);
+  const arr = raw ? JSON.parse(raw) : [];
+  return arr.sort((a,b)=>a.month.localeCompare(b.month));
+}
+
+function setMonthlyHistory(arr){
+  localStorage.setItem(MONTHLY_HISTORY_KEY, JSON.stringify(arr));
 }
 
 function checkin(){
@@ -491,6 +580,13 @@ function getStartOfWeek(date){
   return d;
 }
 
+function getDateString(dateObj){
+  const y = dateObj.getFullYear();
+  const m = String(dateObj.getMonth() + 1).padStart(2,"0");
+  const d = String(dateObj.getDate()).padStart(2,"0");
+  return `${y}-${m}-${d}`;
+}
+
 function renderDashboard(){
   const arr = getData();
 
@@ -562,14 +658,6 @@ function gradeFromScore(score){
   return "F";
 }
 
-function gradeWithLabel(score){
-  if(score >= 19) return "A ⭐ Excellent";
-  if(score >= 17) return "B 👍 Good";
-  if(score >= 14) return "C 🙂 Average";
-  if(score >= 10) return "D ⚠ Needs Work";
-  return "F ❌ Failing";
-}
-
 function renderWeeklyQuiz(){
   const quiz = getQuizData();
 
@@ -624,6 +712,46 @@ function gradeWeek(){
   renderWeeklyQuiz();
 }
 
+function saveThisWeek(){
+  gradeWeek();
+  const quiz = getQuizData();
+
+  if(!quiz.weekOf){
+    alert("Pick a Week Of date first.");
+    return;
+  }
+
+  let history = getWeeklyHistory();
+
+  const savedItem = {
+    weekOf: quiz.weekOf,
+    score: quiz.score || 0,
+    grade: quiz.grade || "F",
+    comment: quiz.comment || "",
+    reward: quiz.reward || "",
+    q1: !!quiz.q1,
+    q2: !!quiz.q2,
+    q3: !!quiz.q3,
+    q4: !!quiz.q4,
+    q5: !!quiz.q5,
+    q6: !!quiz.q6,
+    q7: !!quiz.q7,
+    savedOn: todayStamp()
+  };
+
+  const index = history.findIndex(x => x.weekOf === quiz.weekOf);
+  if(index > -1){
+    history[index] = savedItem;
+    weeklySaveMessageEl.innerHTML = "<b>Updated:</b> Weekly grade for " + escapeHtml(quiz.weekOf) + " was updated and saved.";
+  } else {
+    history.push(savedItem);
+    weeklySaveMessageEl.innerHTML = "<b>Saved:</b> Weekly grade for " + escapeHtml(quiz.weekOf) + " is now stored in history.";
+  }
+
+  setWeeklyHistory(history);
+  renderWeeklyHistory();
+}
+
 function clearWeeklyQuiz(){
   const emptyQuiz = {
     weekOf: "",
@@ -643,6 +771,36 @@ function clearWeeklyQuiz(){
   renderWeeklyQuiz();
 }
 
+function renderWeeklyHistory(){
+  const history = getWeeklyHistory();
+  weeklyHistoryBody.innerHTML = "";
+
+  if(history.length === 0){
+    weeklyHistoryBody.innerHTML = `<tr><td colspan="7">No weekly history saved yet.</td></tr>`;
+    return;
+  }
+
+  history.forEach(item => {
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
+      <td class="nowrap">${escapeHtml(item.weekOf)}</td>
+      <td>${escapeHtml(String(item.score))} / 21</td>
+      <td>${escapeHtml(item.grade)}</td>
+      <td class="left">${escapeHtml(item.comment || "")}</td>
+      <td class="left">${escapeHtml(item.reward || "")}</td>
+      <td class="left">${escapeHtml(item.savedOn || "")}</td>
+      <td><button class="delete-btn" onclick="deleteWeeklyHistory('${item.weekOf}')">X</button></td>
+    `;
+    weeklyHistoryBody.appendChild(tr);
+  });
+}
+
+function deleteWeeklyHistory(weekOf){
+  let history = getWeeklyHistory().filter(x => x.weekOf !== weekOf);
+  setWeeklyHistory(history);
+  renderWeeklyHistory();
+}
+
 function renderMonthlyReport(){
   const report = getReportData();
 
@@ -656,14 +814,7 @@ function renderMonthlyReport(){
   monthResultEl.innerHTML = report.summary || "No monthly report yet.";
 }
 
-function monthlyResult(){
-  const month = reportMonthEl.value;
-  const a = Number(aWeeksEl.value || 0);
-  const b = Number(bWeeksEl.value || 0);
-  const c = Number(cWeeksEl.value || 0);
-  const d = Number(dWeeksEl.value || 0);
-  const f = Number(fWeeksEl.value || 0);
-
+function buildMonthlySummary(month, a, b, c, d, f){
   const total = a + b + c + d + f;
   const weightedScore = (a * 21) + (b * 18) + (c * 15) + (d * 11) + (f * 5);
   const averageScore = total ? Math.round((weightedScore / total) * 10) / 10 : 0;
@@ -673,6 +824,7 @@ function monthlyResult(){
   if(a >= 3) monthMessage = "⭐ Excellent Month";
   else if(a >= 2) monthMessage = "👍 Strong Progress";
   else if(a >= 1) monthMessage = "🙂 Improving";
+  else if(b >= 2) monthMessage = "🙂 Good Consistency";
   else monthMessage = "⚠ Reset Next Month";
 
   const summary =
@@ -683,18 +835,104 @@ function monthlyResult(){
     "<b>Overall Monthly Grade:</b> " + overallGrade + "<br>" +
     "<b>Monthly Result:</b> " + monthMessage;
 
-  const report = {
+  return {
     month,
     aWeeks: a,
     bWeeks: b,
     cWeeks: c,
     dWeeks: d,
     fWeeks: f,
+    totalWeeks: total,
+    averageScore,
+    overallGrade,
+    monthMessage,
     summary
   };
+}
 
+function monthlyResult(){
+  const month = reportMonthEl.value;
+  const a = Number(aWeeksEl.value || 0);
+  const b = Number(bWeeksEl.value || 0);
+  const c = Number(cWeeksEl.value || 0);
+  const d = Number(dWeeksEl.value || 0);
+  const f = Number(fWeeksEl.value || 0);
+
+  const report = buildMonthlySummary(month, a, b, c, d, f);
   setReportData(report);
   renderMonthlyReport();
+}
+
+function loadMonthFromSavedWeeks(){
+  const month = reportMonthEl.value;
+  if(!month){
+    alert("Pick a month first.");
+    return;
+  }
+
+  const history = getWeeklyHistory();
+  const matches = history.filter(item => (item.weekOf || "").slice(0,7) === month);
+
+  let a = 0, b = 0, c = 0, d = 0, f = 0;
+
+  matches.forEach(item => {
+    if(item.grade === "A") a++;
+    else if(item.grade === "B") b++;
+    else if(item.grade === "C") c++;
+    else if(item.grade === "D") d++;
+    else f++;
+  });
+
+  aWeeksEl.value = a;
+  bWeeksEl.value = b;
+  cWeeksEl.value = c;
+  dWeeksEl.value = d;
+  fWeeksEl.value = f;
+
+  const report = buildMonthlySummary(month, a, b, c, d, f);
+  setReportData(report);
+  renderMonthlyReport();
+
+  monthlySaveMessageEl.innerHTML = "<b>Loaded:</b> Month totals were pulled from your saved weekly history for " + escapeHtml(month) + ".";
+}
+
+function saveThisMonth(){
+  monthlyResult();
+  const report = getReportData();
+
+  if(!report.month){
+    alert("Pick a month first.");
+    return;
+  }
+
+  let history = getMonthlyHistory();
+
+  const savedItem = {
+    month: report.month,
+    totalWeeks: report.totalWeeks || 0,
+    aWeeks: report.aWeeks || 0,
+    bWeeks: report.bWeeks || 0,
+    cWeeks: report.cWeeks || 0,
+    dWeeks: report.dWeeks || 0,
+    fWeeks: report.fWeeks || 0,
+    averageScore: report.averageScore || 0,
+    overallGrade: report.overallGrade || "F",
+    monthMessage: report.monthMessage || "⚠ Reset Next Month",
+    summary: report.summary || "",
+    savedOn: todayStamp()
+  };
+
+  const index = history.findIndex(x => x.month === report.month);
+  if(index > -1){
+    history[index] = savedItem;
+    monthlySaveMessageEl.innerHTML = "<b>Updated:</b> Monthly result for " + escapeHtml(report.month) + " was updated and saved.";
+  } else {
+    history.push(savedItem);
+    monthlySaveMessageEl.innerHTML = "<b>Saved:</b> Monthly result for " + escapeHtml(report.month) + " is now stored in history.";
+  }
+
+  setMonthlyHistory(history);
+  renderMonthlyHistory();
 }
 
 function clearMonthlyReport(){
@@ -705,10 +943,49 @@ function clearMonthlyReport(){
     cWeeks: 0,
     dWeeks: 0,
     fWeeks: 0,
+    averageScore: 0,
+    totalWeeks: 0,
+    overallGrade: "F",
+    monthMessage: "⚠ Reset Next Month",
     summary: "No monthly report yet."
   };
   setReportData(emptyReport);
   renderMonthlyReport();
+}
+
+function renderMonthlyHistory(){
+  const history = getMonthlyHistory();
+  monthlyHistoryBody.innerHTML = "";
+
+  if(history.length === 0){
+    monthlyHistoryBody.innerHTML = `<tr><td colspan="12">No monthly history saved yet.</td></tr>`;
+    return;
+  }
+
+  history.forEach(item => {
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
+      <td class="nowrap">${escapeHtml(item.month)}</td>
+      <td>${escapeHtml(String(item.totalWeeks || 0))}</td>
+      <td>${escapeHtml(String(item.aWeeks || 0))}</td>
+      <td>${escapeHtml(String(item.bWeeks || 0))}</td>
+      <td>${escapeHtml(String(item.cWeeks || 0))}</td>
+      <td>${escapeHtml(String(item.dWeeks || 0))}</td>
+      <td>${escapeHtml(String(item.fWeeks || 0))}</td>
+      <td>${escapeHtml(String(item.averageScore || 0))} / 21</td>
+      <td>${escapeHtml(item.overallGrade || "F")}</td>
+      <td class="left">${escapeHtml(item.monthMessage || "")}</td>
+      <td class="left">${escapeHtml(item.savedOn || "")}</td>
+      <td><button class="delete-btn" onclick="deleteMonthlyHistory('${item.month}')">X</button></td>
+    `;
+    monthlyHistoryBody.appendChild(tr);
+  });
+}
+
+function deleteMonthlyHistory(month){
+  let history = getMonthlyHistory().filter(x => x.month !== month);
+  setMonthlyHistory(history);
+  renderMonthlyHistory();
 }
 
 function changeMonth(offset){
@@ -863,9 +1140,22 @@ function renderAll(){
   renderTable();
   renderDashboard();
   renderWeeklyQuiz();
+  renderWeeklyHistory();
   renderMonthlyReport();
+  renderMonthlyHistory();
   renderCalendar();
 }
+
+(function initDefaultDates(){
+  const today = new Date();
+  const monday = getStartOfWeek(today);
+  if(!quizWeekOfEl.value){
+    quizWeekOfEl.value = getDateString(monday);
+  }
+  if(!reportMonthEl.value){
+    reportMonthEl.value = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2,"0")}`;
+  }
+})();
 
 renderAll();
 </script>
